@@ -1,3 +1,45 @@
+<style>
+	.footer-socials>i {
+    font-size: 0px !important;
+    font-weight: 200;
+}
+
+
+.button-group {
+  margin-bottom: 20px;
+}
+.counter {
+  display: inline;
+  margin-top: 0;
+  margin-bottom: 0;
+  margin-right: 10px;
+}
+.posts {
+  clear: both;
+  list-style: none;
+  padding-left: 0;
+  width: 100%;
+  text-align: left;
+}
+.posts li {
+  background-color: #fff;
+  border: 1.5px solid #d8d8d8;
+  border-radius: 10px;
+  padding-top: 10px;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  word-wrap: break-word;
+  min-height: 42px;
+  box-shadow:8px 8px 5px #888888;
+}
+.btn-primary {
+    color: #fff;
+    background-color: #337ab7;
+    border-color: #2e6da4;
+}
+</style>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -58,6 +100,9 @@
     overflow : hidden;
 	top:8em;
 }
+.bb-icon-brand-facebook {
+    display: none !important;
+}
 
  #iframe-id{
     position : absolute;
@@ -72,6 +117,11 @@
   }
   .header {background:gray}
 }
+.clearfix.dez-coming-bx {
+	background-color: aliceblue;
+    text-align: center;
+    padding: 2rem;
+}
 </style>
 
 
@@ -79,7 +129,7 @@
 </head>
 <body id="bg" class="font-poppins">
 
-<div id="loading-area"><div></div></div>
+<!-- <div id="loading-area"><div></div></div> -->
 <div class="page-wraper">
 	<canvas class="site-nav-canvas" style="display: none;"></canvas>
     <!-- Content -->
@@ -111,6 +161,30 @@
 	<div id="div-id">
 		<iframe src="https://findaspring.com/map/" id="iframe-id" scrolling="no"></iframe>
 	</div>
+
+	<div>
+<br>
+<br>
+<br>
+		<div class="container">
+			<h2 class="text-center">Add Your Comment</h2>
+			<div class="nav justify-content-center">
+				<div class="col-md-6 col-sm-12 bg-light p-3">
+			<form class="">
+			  <div class="form-group">
+				<textarea class="form-control status-box" rows="3" placeholder="Enter your comment here..."></textarea>
+			  </div>
+			</form>
+			<div class="button-group pull-right">
+			  <p class="counter">250</p>
+			  <a href="#" class="btn btn-primary">Post</a>
+			</div>
+			<ul class="posts">
+			</ul>
+		  </div>
+		</div>
+		</div>
+	</div>
     <!-- Content END-->
 </div>
 <!-- JavaScript  files ========================================= -->
@@ -123,3 +197,30 @@
 <div class="site-nav-overlay js-nav"z></div>
 </body>
 </html>
+
+<script>
+
+var main = function() {
+  $('.btn').click(function() {
+    var post = $('.status-box').val();
+    $('<li>').text(post).prependTo('.posts');
+    $('.status-box').val('');
+    $('.counter').text('250');
+    $('.btn').addClass('disabled');
+  });
+  $('.status-box').keyup(function() {
+    var postLength = $(this).val().length;
+    var charactersLeft = 250 - postLength;
+    $('.counter').text(charactersLeft);
+    if (charactersLeft < 0) {
+      $('.btn').addClass('disabled');
+    } else if (charactersLeft === 250) {
+      $('.btn').addClass('disabled');
+    } else {
+      $('.btn').removeClass('disabled');
+    }
+  });
+}
+$('.btn').addClass('disabled');
+$(document).ready(main)
+</script>
