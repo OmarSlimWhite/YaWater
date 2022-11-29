@@ -1,4 +1,7 @@
 <style>
+	.at-expanding-share-button-toggle-bg {
+			display: none !important;
+	}
 	.footer-socials>i {
 		font-size: 0px !important;
 		font-weight: 200;
@@ -43,6 +46,9 @@
 		background-color: #337ab7;
 		border-color: #2e6da4;
 	}
+	.at-expanding-share-button-desktop{
+		display: none !important;
+	}
 </style>
 <!DOCTYPE html>
 <html lang="en">
@@ -59,6 +65,8 @@
 	<meta property="og:description" content="" />
 	<meta property="og:image" content="" />
 	<meta name="format-detection" content="">
+	<link href="https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.css" rel="stylesheet">
+	<script src="https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.js"></script>
 
 	<!-- FAVICONS ICON -->
 	<link rel="icon" href="images/favicon.ico" type="image/x-icon" />
@@ -84,11 +92,15 @@
 	<link rel="stylesheet" type="text/css" class="skin" href="css/skin/skin-1.css">
 	<link rel="stylesheet" type="text/css" href="css/jquery.localizationTool.css">
 	<link href="https://fonts.googleapis.com/css?family=Amatic+SC:400,700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" type="text/css" href="css/slider.css">
 
 	<!-- Google Font -->
 	<style>
 		@import url('https://fonts.googleapis.com/css?family=Barlow:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i|Lora:400,400i,700,700i|Montserrat:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i|Poppins:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i|Roboto:100,100i,300,300i,400,400i,500,500i,700,700i,900,900i&display=swap');
 	</style>
+
+	<!-- Papaparse: For reading csv file -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js" integrity="sha512-SGWgwwRA8xZgEoKiex3UubkSkV1zSE1BS6O4pXcaxcNtUlQsOmOmhVnDwIvqGRfEmuz83tIGL13cXMZn6upPyg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 	<style>
 		.DZ-theme-btn {
@@ -141,7 +153,57 @@
 			text-align: center;
 			padding: 2rem;
 		}
+		#map { 
+
+			position: relative;
+			top: 2%;
+			bottom: 0;
+			width: 100%;
+			height: 80vh;
+		 }
+
+		 #dropdowns {
+			position: relative;
+			top: 5%;
+			width:100%;
+			height: 50px;
+			background-color: 'red';
+		 }
+
+		 #legend-container{
+
+			height: 120px;
+			width: 220px;
+			background-color: 'rgb(255,255,255,0.9)';
+			border-radius:8px;
+			display: 'flex';
+			flex-direction: 'column';
+			justify-content: 'space-between';
+			align-items: center;
+			padding: 8px;
+		 }
+
+		 
+		 .legend-row {
+			display:'flex';
+        	height: 30px;
+			justify-content: 'center';
+			align-items: center;
+		 }
+
+		 .legend-text{
+			margin-bottom: 0px;
+			margin-top:0px;
+		 }
+
+
 	</style>
+
+	<script>
+		const onSelect = (e)=> {
+			console.loe(clicked,e)
+		}
+	</script>
 
 
 
@@ -184,11 +246,21 @@
 		</div>
 	</div>
 
+	<div id="dropdowns">
 
-	<div id="div-id">
-		<iframe src="https://findaspring.com/map/" id="iframe-id" scrolling="no"></iframe>
+			<select id="select_africa" onchange="onSelectArfica()"> </select>
+			<select id="select_asia" onchange="onSelectAsia()"> </select>
+			<select id="select_europe" onchange="onSelectEurope()"> </select>
+			<select id="select_n_america" onchange="onSelectNAmerica()"> </select>
+			<select id="select_s_america" onchange="onSelectSAmerica()"></select>
+			<select id="select_australia" onchange="onSelectAustralia()"> </select>
+
+		  
+		<div id="map">
+
+	</div>	
+
 	</div>
-
 	<div>
 		<!-- <br>
 <br>
@@ -251,4 +323,382 @@
 	}
 	$('.btn').addClass('disabled');
 	$(document).ready(main)
+</script>
+
+<script>
+	mapboxgl.accessToken = 'pk.eyJ1Ijoib21hcnNsaW13aGl0ZSIsImEiOiJjbGIxOHIxcmYxYXptM3BtOXJsaTQxanoyIn0.6iFG9J7hkcQn3qfIyUe1tw';
+	const map = new mapboxgl.Map({
+	container: 'map', // container ID
+	// Choose from Mapbox's core styles, or make your own style with Mapbox Studio
+	style: 'mapbox://styles/mapbox/streets-v11', // style URL
+	center: [-96, 37.8],
+    zoom: 3,
+	
+	});
+
+	map.addControl(new mapboxgl.NavigationControl());
+	map.addControl(new mapboxgl.FullscreenControl());
+    var geojson = {
+      'type': 'FeatureCollection',
+	  'features':[]
+    };
+  var mapMode = 'viewAll';
+
+   
+  	map.loadImage(
+	'./images/png/drop-blue.png',
+	(error, image) => {
+	if (error) throw error;
+	
+	// Add the image to the map style.
+	map.addImage('water-drop-pub', image);
+	})
+
+	map.loadImage(
+	'./images/png/drop-purple.png',
+	(error, image) => {
+	if (error) throw error;
+	
+	// Add the image to the map style.
+	map.addImage('water-drop-priv', image);
+	})
+
+	map.loadImage(
+	'./images/png/drop-yellow.png',
+	(error, image) => {
+	if (error) throw error;
+	
+	// Add the image to the map style.
+	map.addImage('water-drop-hot-pub', image);
+	})
+
+	map.loadImage(
+	'./images/png/drop-red.png',
+	(error, image) => {
+	if (error) throw error;
+	
+	// Add the image to the map style.
+	map.addImage('water-drop-hot-priv', image);
+	})
+
+	function addDataLayer() {
+		map.addSource("cat-springs", {
+			type: 'geojson',
+			data: geojson
+		});
+
+	map.addLayer({
+				'id': "cat-springs",
+				'type': 'symbol', 
+				'source': "cat-springs" ,
+				'layout': {
+					'visibility': 'visible',
+					'icon-image': ["match",["get","springtype"],
+							["Public Drinking Spring"],"water-drop-pub",
+							["Private Drinking Spring"],"water-drop-priv",
+							["Free Hot Spring"],"water-drop-hot-pub", 
+							["Paid Hot Spring"],"water-drop-hot-priv" 
+							,"water-drop-pub"],
+							"icon-size": 0.1,
+							'icon-allow-overlap' : true,
+				},
+		}); //add layer
+	}
+
+	function drawMap() {
+		map.on('load', function() {
+					addDataLayer();
+					map.on('click', function(e) {
+						var features = map.queryRenderedFeatures(e.point, {
+						layers: ['cat-springs']
+						});
+					
+						if (!features.length) {
+						return;
+						}
+						var feature = features[0];
+					
+						var popup = new mapboxgl.Popup({ offset: [0, 10] })
+						.setLngLat(feature.geometry.coordinates)
+						.setHTML(feature.properties.description)
+						.addTo(map);
+
+					});
+						// Change the cursor to a pointer when the mouse is over the places layer.
+						map.on('mouseenter', 'cat-springs', function() {
+						map.getCanvas().style.cursor = 'pointer';
+						});
+						
+						// Change it back to a pointer when it leaves.
+						map.on('mouseleave', 'cat-springs', function() {
+						map.getCanvas().style.cursor = '';
+						});
+					// Center the map on the coordinates of any clicked symbol from the 'symbols' layer.
+					map.on('click', 'cat-springs', function(e) {
+						map.flyTo({ center: e.features[0].geometry.coordinates });
+					});
+		}); // on load
+	
+	}
+ 
+	drawMap();
+
+	function addLegendControl() {
+		class LegendControl {
+			onAdd(map) {
+			const div = document.createElement("div");
+			div.className = "mapboxgl-ctrl mapboxgl-ctrl-group";
+			div.id="legend-container";
+			div.innerHTML = `
+				<div style="display:flex; ">
+					<div style="flex:1;">
+						<label class="switch">
+							<input type="checkbox" checked id="check-free-cold" onchange="toggleLayer()" />
+							<span class="slider"></span>
+						</label>
+					</div>
+					<div style="flex:1;">
+						<img src="images/png/drop-blue.png" style="height:18px; width:18px;" alt="drop-icon"/>
+					</div>
+					<div style="flex:3;">
+						<p class="legend-text"><strong>Free Cold Springs</strong></p>
+					</div>
+				</div>
+				<div style="display:flex;">
+					<div style="flex:1;">
+						<label class="switch">
+							<input type="checkbox" checked id="check-paid-cold" onchange="toggleLayer()" />
+							<span class="slider"></span>
+						</label>
+					</div>
+					<div style="flex:1;">
+						<img src="images/png/drop-purple.png" style="height:18px; width:18px;" alt="drop-icon"/>
+					</div>
+					<div style="flex:3;">
+						<p class="legend-text"><strong>Paid Cold Springs</strong></p>
+					</div>
+				</div>
+				<div style="display:flex;">
+					<div style="flex:1;">
+						<label class="switch">
+							<input type="checkbox" checked id="check-free-hot" onchange="toggleLayer()" /> 
+							<span class="slider"></span>
+						</label>
+					</div>
+					<div style="flex:1;">
+						<img src="images/png/drop-yellow.png" style="height:18px; width:18px;" alt="drop-icon"/>
+					</div>
+					<div style="flex:3;">
+						<p class="legend-text"><strong>Free Hot Springs</strong></p>
+					</div>
+				</div>
+				<div style="display:flex;">
+					<div style="flex:1;">
+						<label class="switch">
+							<input type="checkbox" checked id="check-paid-hot" onchange="toggleLayer()" />
+							<span class="slider"></span>
+						</label>
+					</div>
+					<div style="flex:1;">
+						<img src="images/png/drop-red.png" style="height:18px; width:18px;" alt="drop-icon"/>
+					</div>
+					<div style="flex:3;">
+						<p class="legend-text"><strong>Paid Hot Springs</strong></p>
+					</div>
+				</div>
+				`;
+			return div;
+			}
+		}
+		const legendControl = new LegendControl();
+		map.addControl(legendControl, "bottom-left");
+	}
+	addLegendControl();
+	
+
+	map.on('load', function() {
+	fetch("/springs.csv")
+	.then(res=>res.text())
+	.then(csv=>{
+		Papa.parse(csv, {
+		complete: function(results) {
+			jsonData =   [...(results.data.map((row, index)=>{
+				if(index!==0){
+					if(
+						row[results.data[0].indexOf('lat')]!==null && 
+						row[results.data[0].indexOf('lat')]!==0 &&
+						row[results.data[0].indexOf('long')]!==null &&
+						row[results.data[0].indexOf('long')]!==0 
+						){
+						return({
+							type: "Feature",
+							geometry : {
+								type:"Point",
+								coordinates:[
+									parseFloat(row[results.data[0].indexOf('long')]),
+									parseFloat(row[results.data[0].indexOf('lat')]),
+								]
+							},
+							properties:{
+								springtype: row[results.data[0].indexOf('spring_type')],
+								url: row[results.data[0].indexOf('gmaps')],
+								title: row[results.data[0].indexOf('name')],
+								continent: row[results.data[0].indexOf('continent')],
+								country: row[results.data[0].indexOf('country')],
+								icon : "water",
+								description: `<div class="marker">
+									<h5>${row[results.data[0].indexOf('name')]}</h5>
+									<a href="${row[results.data[0].indexOf('gmaps')]}" target="_blank" rel="noopener noreferrer" >Go to location</a>
+									</div>`
+							}
+						})
+					}
+					
+				}
+			}))]
+
+			geojson['features'] = jsonData.filter(f=>f!==undefined);
+
+			console.log('jsonData',jsonData);
+			
+
+			map.getSource('cat-springs').setData({
+				type :"FeatureCollection",
+				features: jsonData.filter(d=>d!=null)
+			});
+		}
+	});
+	});
+
+	if ( mapMode != 'viewAll' ) {
+		// Viewing a category page
+		var cat = '';
+		
+		var filteredFeatures = map.getSource('cat-springs')._options.data.features.filter((feature) => {
+			return (feature.properties.category.indexOf(cat) >= 0);
+		});
+		
+			if ( filteredFeatures.length <= 0 ) {
+			return false;
+			}
+			
+			var newBounds = new mapboxgl.LngLatBounds();
+		
+			filteredFeatures.forEach(function(feature) {
+				newBounds.extend(feature.geometry.coordinates);
+			});
+		
+			map.fitBounds(newBounds, {
+			padding: 20
+			}); 
+		} 
+    }); // on load
+
+	/** Add Data in options */
+	const africa_states = ['Africa','South Africa'];
+	const asia_states = ['Asia','China','India','Indonesia','Iraq','Israel','Japan','Malaysia','Nepal','Pakistan','Philippines','Russian Federation','Saudi Arabia','South Korea','Taiwan','Turkey','Vietnam']
+	const europe_states = ['Europe','Austria','Azerbaijan','Belgium','Bosnia abd Herzegovina','Bulgaria','Croatia','Czech Republic','Denmark','England','Estonia','Finland','France','Georgia','Germany','Greece','Iceland','Irelance','Italy','Lithuania','Macedonia','Moldova','Montenegro','Netherlands','North Wales','Norway','Poland','Romania','Scotland','Slovakia','Slovenia','Spain','Sweden','Switzerland','Turkey','Ukraine','Wales']
+	const n_america_states = ['North America','Canada','Caribbean Islands','Central America','Mexico','United States']
+	const s_america_states = ['South America','Brazil','Chile','Ecuador','Peru','Venezuela']
+	const australia_states = ['Australia','New Zealand']
+
+	
+
+	const selectAfrica = document.getElementById('select_africa');
+	africa_states.forEach(a=>selectAfrica.add(new Option(a,a)));
+
+	const selectAsia = document.getElementById('select_asia');
+	asia_states.forEach(a=>selectAsia.add(new Option(a,a)));
+
+	const selectEurope = document.getElementById('select_europe');
+	europe_states.forEach(a=>selectEurope.add(new Option(a,a)));
+
+	const selectNAmerica = document.getElementById('select_n_america');
+	n_america_states.forEach(a=>selectNAmerica.add(new Option(a,a)));
+
+	const selectSAmerica = document.getElementById('select_s_america');
+	s_america_states.forEach(a=>selectSAmerica.add(new Option(a,a)));
+
+	const selectAustralia = document.getElementById('select_australia');
+	australia_states.forEach(a=>selectAustralia.add(new Option(a,a)));
+
+
+	/**  On Drop down select */
+	function onSelectAfrica() {
+		var x = document.getElementById("select_africa").value;
+		console.log('you selected ',x);
+		zoomMapToBounds(x);
+	}
+
+	function onSelectAsia() {
+		var x = document.getElementById("select_asia").value;
+		console.log('you selected ',x);
+		zoomMapToBounds(x);
+	}
+
+	function onSelectEurope() {
+		var x = document.getElementById("select_europe").value;
+		console.log('you selected ',x);
+		zoomMapToBounds(x);
+	}
+
+	function onSelectNAmerica() {
+		var x = document.getElementById("select_n_america").value;
+		console.log('you selected ',x);
+		zoomMapToBounds(x);
+	}
+
+	function onSelectSAmerica() {
+		var x = document.getElementById("select_s_america").value;
+		console.log('you selected ',x);
+		zoomMapToBounds(x);
+	}
+
+	function onSelectAustralia() {
+		var x = document.getElementById("select_australia").value;
+		console.log('you selected ',x);
+		zoomMapToBounds(x);
+	}
+
+
+	function zoomMapToBounds(c){
+		const bounds = new mapboxgl.LngLatBounds();
+        geojson['features']
+        .filter(f=>
+            (f.properties.continent && f.properties.continent.toLowerCase().includes(c.toLowerCase())) || 
+            (f.properties.country && f.properties.country.toLowerCase().includes(c.toLowerCase())))
+        .forEach(f=>{
+            bounds.extend(f.geometry.coordinates);
+        })
+        map.fitBounds(bounds, {
+            padding: 20
+        });
+	}
+
+
+	/** Toggle Functions for legend*/
+
+	function toggleLayer(){
+		var chkFreeCold=document.getElementById("check-free-cold").checked;
+		var chkPaidCold=document.getElementById("check-paid-cold").checked;
+		var chkFreeHot=document.getElementById("check-free-hot").checked;
+		var chkPaidHot=document.getElementById("check-paid-hot").checked;
+
+		let activeLayers = [
+			...(chkFreeCold?['Public Drinking Spring']:[]),
+			...(chkPaidCold?['Private Drinking Spring']:[]),
+			...(chkFreeHot?['Free Hot Spring']:[]),
+			...(chkPaidHot?['Paid Hot Spring']:[]),
+		]
+
+
+		console.log(activeLayers);
+		map.getSource('cat-springs').setData({
+				type :"FeatureCollection",
+				features: geojson.features
+				.filter(d=>d!=null)
+				.filter(f=>activeLayers.includes(f.properties.springtype))
+		});
+	}
+
 </script>
