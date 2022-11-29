@@ -49,8 +49,6 @@
 	.at-expanding-share-button-desktop{
 		display: none !important;
 	}
-
-
 </style>
 <!DOCTYPE html>
 <html lang="en">
@@ -198,14 +196,6 @@
 			margin-top:0px;
 		 }
 
-		 @supports (-moz-appearance:button) and (contain:paint) {
-
-			#dropdowns {
-				margin-top:50px
-			}
-
-			}
-
 
 	</style>
 
@@ -258,7 +248,7 @@
 
 	<div id="dropdowns">
 
-			<select id="select_africa" onchange="onSelectArfica()"> </select>
+			<select id="select_africa" onchange="onSelectAfrica()"> </select>
 			<select id="select_asia" onchange="onSelectAsia()"> </select>
 			<select id="select_europe" onchange="onSelectEurope()"> </select>
 			<select id="select_n_america" onchange="onSelectNAmerica()"> </select>
@@ -610,7 +600,7 @@
 	const europe_states = ['Europe','Austria','Azerbaijan','Belgium','Bosnia abd Herzegovina','Bulgaria','Croatia','Czech Republic','Denmark','England','Estonia','Finland','France','Georgia','Germany','Greece','Iceland','Irelance','Italy','Lithuania','Macedonia','Moldova','Montenegro','Netherlands','North Wales','Norway','Poland','Romania','Scotland','Slovakia','Slovenia','Spain','Sweden','Switzerland','Turkey','Ukraine','Wales']
 	const n_america_states = ['North America','Canada','Caribbean Islands','Central America','Mexico','United States']
 	const s_america_states = ['South America','Brazil','Chile','Ecuador','Peru','Venezuela']
-	const australia_states = ['Australia','New Zealand']
+	const australia_states = ['Oceania','Australia','New Zealand']
 
 	
 
